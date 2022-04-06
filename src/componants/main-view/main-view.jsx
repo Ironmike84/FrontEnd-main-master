@@ -4,6 +4,7 @@ import React from 'react';
 import { LoginView } from '../login-view/login-view';
 import { MovieCard } from '../movie-card/movie-card';
 import { MovieView } from '../movie-view/movie-view';
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import './main-view.scss';
@@ -14,7 +15,7 @@ export class MainView extends React.Component{
       this.state = {
         movies: [],
         user: null,
-        selectedMovie: null
+      
 
       };
     }
@@ -67,37 +68,35 @@ export class MainView extends React.Component{
       }
       
       render() {
-        const { movies, user, selectedMovie } = this.state;
+        const { movies, user } = this.state;
     
         if (!user) return <Row>
-          <Col >
+          <Col>
             <LoginView onLoggedIn={user => this.onLoggedIn(user)} />
           </Col>
         </Row>
         if (movies.length === 0) return <div className="main-view" />;
-      
+    
         return (
-          <div className="main-view">
-            {selectedMovie
-              ? (
-                <Row className="justify-content-md-center">
-                  <Col md={4}>
-                    <MovieView movie={selectedMovie} onBackClick={newSelectedMovie => { this.setSelectedMovie(newSelectedMovie); }} />
+          <Router>
+            <Row className="main-view justify-content-md-center">
+              <Route exact path="/" render={() => {
+                return movies.map(m => (
+                  <Col md={3} key={m._id}>
+                    <MovieCard movie={m} />
                   </Col>
-                </Row>
-              )
-              : (
-                <Row className="justify-content-md-center">
-                  {movies.map(movie => (
-                    <Col md={4}>
-                      <MovieCard key={movie._id} movie={movie} onMovieClick={newSelectedMovie => { this.setSelectedMovie(newSelectedMovie); }}/>
-                    </Col>
-                  ))}
-                </Row>
-              )
-            }
-          </div>
+                ))
+              }} />
+              <Route path="/movies/:movieId" render={({ match }) => {
+                return <Col md={8}>
+                  <MovieView movie={movies.find(m => m._id === match.params.movieId)} />
+                </Col>
+              }} />
+    
+            </Row>
+          </Router>
         );
-}
-}
+      }
+    }
+
 export default MainView;
